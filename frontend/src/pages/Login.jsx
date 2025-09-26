@@ -43,7 +43,7 @@ export default function Login({ onAuth }) {
       ></div>
       
       {/* Dark overlay to match the design */}
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-900/80 via-gray-900/90 to-gray-900/80"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-gray-900/60 via-gray-900/60 to-gray-900/40"></div>
 
       {/* Login Form Container */}
       <div className="relative z-10 w-full max-w-md mx-auto p-6">

@@ -52,7 +52,7 @@ export default function Signup(){
       ></div>
       
       {/* Dark overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-900/80 via-gray-900/90 to-gray-900/80"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-gray-900/60 via-gray-900/60 to-gray-900/40"></div>
 
       {/* Signup Form */}
       <div className="relative z-10 w-full max-w-md mx-auto p-6">
