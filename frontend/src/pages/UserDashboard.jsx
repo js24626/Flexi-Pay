@@ -1,339 +1,256 @@
 import React, { useEffect, useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
-import InstallmentTable from '../components/InstallmentTable'
-import InstallmentForm from '../components/InstallmentForm'
+import { useNavigate } from 'react-router-dom'
 import { api } from '../lib/api'
-import { BarChart3, PlusCircle } from "lucide-react";
 
-// Sidebar Component for User
-const UserSidebar = ({ activeModule, setActiveModule, userProfile, onLogout }) => {
- const menuItems = [
-  { id: "overview", label: "Overview", icon: <BarChart3 size={20} /> },
-  { id: "create", label: "Create Installment", icon: <PlusCircle size={20} /> },
-];
-  return (
-    <div className="w-64 bg-slate-800 text-white min-h-screen flex flex-col">
-      {/* Profile Section */}
-      <div className="p-6 border-b border-slate-700">
-        <div className="flex items-center space-x-3">
-          <div className="w-12 h-12">
-            <img
-              src="/images/user.png"   
-              alt="App Logo"
-              className="w-full h-full object-contain"
-            />
-          </div>
-          <div>
-            <h3 className="font-semibold text-sm">{userProfile.name}</h3>
-            <p className="text-slate-400 text-xs">{userProfile.role}</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Navigation Menu */}
-      <nav className="flex-1 py-6">
-        <ul className="space-y-2 px-4">
-          {menuItems.map((item) => (
-            <li key={item.id}>
-              <button
-                onClick={() => setActiveModule(item.id)}
-                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors ${
-                  activeModule === item.id
-                    ? 'bg-blue-600 text-white'
-                    : 'text-slate-300 hover:bg-slate-700 hover:text-white'
-                }`}
-              >
-                <span className="text-lg">{item.icon}</span>
-                <span className="font-medium">{item.label}</span>
-              </button>
-            </li>
-          ))}
-        </ul>
-      </nav>
-
-       {/* Logout Button */}
-      <div className="p-4 border-t border-slate-700">
-        <button
-          onClick={onLogout}
-          className="w-full flex items-center space-x-3 px-4 py-3 text-slate-300 hover:bg-red-600 hover:text-white rounded-lg transition-colors"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+// Simple Installment Table Component for Agent
+const AgentInstallmentTable = ({ installments }) => {
+  if (installments.length === 0) {
+    return (
+      <div className="bg-white rounded-lg shadow-sm border p-8 text-center">
+        <div className="text-gray-500">
+          <svg className="w-12 h-12 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
           </svg>
-          <span className="font-medium">Logout</span>
-        </button>
-      </div>
-    </div>
-  )
-}
-
-// Overview Module for User with Banking Style Cards
-const UserOverviewModule = ({ items, stats, isLoading }) => {
-  const totalAmount = items.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0)
-  const approvedAmount = items
-    .filter(item => item.status?.toLowerCase() === 'approved')
-    .reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0)
-  const pendingAmount = totalAmount - approvedAmount
-
-  const statCards = [
-    { 
-      label: 'Total Installments', 
-      value: stats.total, 
-      amount: totalAmount,
-      bgClass: 'bg-gradient-to-r from-blue-500 to-blue-400',
-      textColor: 'text-white',
-      count: stats.total
-    },
-    { 
-      label: 'Pending Approval', 
-      value: stats.pending, 
-      amount: pendingAmount,
-      bgClass: 'bg-gradient-to-r from-gray-200 to-gray-200',
-      textColor: 'text-gray-800',
-      count: stats.pending
-    },
-    { 
-      label: 'Approved', 
-      value: stats.approved, 
-      amount: approvedAmount,
-      bgClass: 'bg-gradient-to-r from-gray-200 to-gray-200',
-      textColor: 'text-gray-800',
-      count: stats.approved
-    }
-  ]
-
-  return (
-    <div>
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">Overview</h2>
-      
-      {/* Banking Style Stats Cards - Exact Same as Admin Dashboard */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        {statCards.map((stat, index) => (
-          <div key={index} className={`${stat.bgClass} rounded-lg shadow-sm border p-6 relative overflow-hidden`}>
-           
-            
-            {/* Card Content */}
-            <div className={`${stat.textColor}`}>
-              <h3 className="text-sm font-medium opacity-90 mb-2">{stat.label}</h3>
-              <div className="text-left">
-  <span className="text-2xl font-bold text-gray-600">
-    {stat.count}
-  </span>
-</div>
-              
-              <div className="flex items-end justify-between mt-4">
-                <div>
-                
-                  <p className="text-lg font-semibold">
-                    <span className="text-xs opacity-75">TOTAL RECORDS</span><br />
-                    Rs {stat.amount.toLocaleString()}
-                  </p>
-                </div>
-               
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Recent Installments - Professional Table Style */}
-      <div className="bg-white rounded-lg shadow-sm border p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Installments</h3>
-        {isLoading ? (
-          <div className="flex justify-center py-8">
-            <div className="text-gray-500">Loading your installments...</div>
-          </div>
-        ) : items.length === 0 ? (
-          <div className="text-center py-8">
-            <div className="text-gray-400 text-4xl mb-2">📝</div>
-            <p className="text-gray-500">No installments yet</p>
-            <p className="text-sm text-gray-400">Create your first installment to get started</p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {items.slice(0, 5).map((item, index) => (
-              <div key={index} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0">
-                <div className="flex items-center space-x-3">
-                  <div className={`w-3 h-3 rounded-full ${
-                    item.status?.toLowerCase() === 'approved' 
-                      ? 'bg-green-500' 
-                      : 'bg-yellow-500'
-                  }`}></div>
-                  <div>
-                    <p className="font-medium text-gray-900">Installment #{item.id}</p>
-                    <p className="text-sm text-gray-600">
-                      {item.created_at ? new Date(item.created_at).toLocaleDateString() : 'Recent'}
-                    </p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="font-semibold text-gray-900">Rs {item.amount || 0}</p>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    item.status?.toLowerCase() === 'approved' 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-yellow-100 text-yellow-800'
-                  }`}>
-                    {item.status || 'Pending'}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
-
-// Create Installment Module
-const CreateInstallmentModule = ({ onCreateInstallment }) => {
-  return (
-    <div>
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">Create New Installment</h2>
-      <div className="bg-white rounded-lg shadow-sm border p-6">
-        <div className="mb-4">
-          <p className="text-gray-600">
-            Fill out the form below to create a new installment request. 
-            All requests will be reviewed and approved by an administrator.
-          </p>
+          <p className="text-lg font-medium mb-2">No installments assigned yet</p>
+          <p className="text-sm">Your admin will assign installments to you soon</p>
         </div>
-        <InstallmentForm onSubmit={onCreateInstallment} />
       </div>
-    </div>
-  )
-}
-
-// Main User Dashboard Component
-export default function UserDashboard({ user }) {
-  const [items, setItems] = useState([])
-  const [isLoading, setIsLoading] = useState(false)
-  const [activeModule, setActiveModule] = useState('overview')
-  const navigate = useNavigate()
-
-  // User profile
-  const userProfile = {
-    name: user?.full_name || user?.name || 'User',
-    role: 'Customer'
+    )
   }
 
-  const loadInstallments = async () => {
+  return (
+    <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+      <div className="px-6 py-4 border-b border-gray-200">
+        <h3 className="text-lg font-semibold text-gray-900">My Assigned Installments</h3>
+        <p className="text-sm text-gray-500 mt-1">Installments assigned to you by admin</p>
+      </div>
+      
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Title
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Amount
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Date
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Status
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {installments.map((installment, index) => (
+              <tr key={installment.id || index} className="hover:bg-gray-50">
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm font-medium text-gray-900">{installment.title}</div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm text-gray-900">Rs {parseFloat(installment.amount || 0).toLocaleString()}</div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm text-gray-900">{installment.date}</div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    Active
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
+// Main Agent Dashboard Component
+export default function AgentDashboard() {
+  const [myInstallments, setMyInstallments] = useState([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [agentInfo, setAgentInfo] = useState(null)
+  const navigate = useNavigate()
+
+  const loadMyInstallments = async () => {
     try {
       setIsLoading(true)
-      const data = await api('/installments')
-      setItems(data || [])
+      
+      // Get current agent info from localStorage
+      const currentUser = JSON.parse(localStorage.getItem('user') || '{}')
+      setAgentInfo(currentUser)
+      
+      // Load all installments
+      const allInstallments = await api('/installments')
+      
+      // Filter installments assigned to current agent
+      const myAssignedInstallments = (allInstallments || []).filter(
+        installment => installment.agentName && 
+        installment.agentName.toLowerCase() === currentUser.username?.toLowerCase()
+      )
+      
+      setMyInstallments(myAssignedInstallments)
+      
     } catch (error) {
-      alert(error.message || 'Failed to load installments')
+      console.error('Failed to load installments:', error)
+      // Don't show alert for loading errors, just log them
     } finally {
       setIsLoading(false)
     }
   }
 
   useEffect(() => {
-    loadInstallments()
+    loadMyInstallments()
   }, [])
 
-  const handleCreateInstallment = async (payload) => {
-    try {
-      const created = await api('/installments', { 
-        method: 'POST', 
-        body: payload 
-      })
-      setItems(prev => [created, ...prev])
-      alert('Installment created successfully! It will be reviewed by an administrator.')
-      setActiveModule('overview') // Redirect to overview after creation
-    } catch (error) {
-      alert(error.message || 'Failed to create installment')
-    }
-  }
+ 
 
-  const handleLogout = () => {
-    if (confirm('Are you sure you want to logout?')) {
-      // Clear tokens/session
-      localStorage.removeItem('token')
-      sessionStorage.clear()
-
-      // Optionally clear user state if stored globally
-      // setUser(null)
-
-      // Redirect to login page
-      navigate('/login')
-    }
-  }
-
-  const getInstallmentStats = () => {
-    const pending = items.filter(item => 
-      !item.status || item.status.toLowerCase() === 'pending'
-    ).length
-    
-    const approved = items.filter(item => 
-      item.status && item.status.toLowerCase() === 'approved'
-    ).length
-
-    const totalAmount = items.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0)
-
-    return { pending, approved, total: items.length, totalAmount }
-  }
-
-  const stats = getInstallmentStats()
-
-  const renderActiveModule = () => {
-    switch (activeModule) {
-      case 'overview':
-        return (
-          <UserOverviewModule 
-            items={items} 
-            stats={stats} 
-            isLoading={isLoading}
-          />
-        )
-      case 'create':
-        return <CreateInstallmentModule onCreateInstallment={handleCreateInstallment} />
-      default:
-        return (
-          <UserOverviewModule 
-            items={items} 
-            stats={stats} 
-            isLoading={isLoading}
-          />
-        )
-    }
-  }
+  const totalInstallments = myInstallments.length
+  const totalAmount = myInstallments.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0)
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      {/* Sidebar */}
-      <UserSidebar 
-        activeModule={activeModule}
-        setActiveModule={setActiveModule}
-        userProfile={userProfile}
-        onLogout={handleLogout}
-      />
+    <div className="min-h-screen bg-gray-50">
+      {/* Top Navbar */}
+      <nav className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            {/* Left side - Agent Info */}
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10">
+                <div className="w-full h-full bg-green-100 rounded-lg flex items-center justify-center">
+                  <span className="text-green-600 font-bold text-lg">
+                    {agentInfo?.username?.charAt(0).toUpperCase() || 'A'}
+                  </span>
+                </div>
+              </div>
+              <div>
+                <h1 className="text-lg font-semibold text-gray-900">
+                  {agentInfo?.username || 'Agent'}
+                </h1>
+                <p className="text-sm text-gray-500">Agent Dashboard</p>
+              </div>
+            </div>
+
+            {/* Right side - Logout */}
+           <button
+  onClick={() => {
+    if (!window.confirm('Are you sure you want to logout?')) return
+
+    if (typeof onLogout === 'function') {
+      // preferred: call the App-level logout which does setUser(null) + navigate('/login')
+      onLogout()
+    } else {
+      // fallback: clear storage and force a safe navigation
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
+      sessionStorage.clear()
+      // use replace to avoid back-button exposing a protected route
+      window.location.replace('/login')
+    }
+  }}
+  className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+  title="Logout"
+>
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+  </svg>
+  <span>Logout</span>
+</button>
+          </div>
+        </div>
+      </nav>
 
       {/* Main Content */}
-      <div className="flex-1">
-        {/* Header */}
-        <div className="bg-white shadow-sm border-b px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-lg font-semibold text-gray-900">
-                Welcome back, {userProfile.name}!
-              </h1>
-              <p className="text-sm text-gray-600">Manage your installment payments</p>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Welcome Section */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            Welcome, {agentInfo?.username || 'Agent'}!
+          </h2>
+          <p className="text-gray-600">
+            Here are the installments assigned to you by your admin.
+          </p>
+        </div>
+
+        {/* Overview Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          {/* My Installments Card */}
+          <div className="bg-white rounded-lg shadow-sm border p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">My Installments</h3>
+                <p className="text-3xl font-bold text-green-600">{totalInstallments}</p>
+                <p className="text-sm text-gray-500 mt-1">Assigned by admin</p>
+              </div>
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+              </div>
             </div>
-            <button
-              onClick={loadInstallments}
-              disabled={isLoading}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
-            >
-              {isLoading ? 'Refreshing...' : 'Refresh'}
-            </button>
+          </div>
+
+          {/* Total Amount Card */}
+          <div className="bg-white rounded-lg shadow-sm border p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Total Amount</h3>
+                <p className="text-3xl font-bold text-blue-600">Rs {totalAmount.toLocaleString()}</p>
+                <p className="text-sm text-gray-500 mt-1">Sum of all installments</p>
+              </div>
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
+                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                </svg>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Content Area */}
-        <div className="p-6">
-          {renderActiveModule()}
+        {/* Refresh Button */}
+        <div className="mb-6">
+          <button
+            onClick={loadMyInstallments}
+            disabled={isLoading}
+            className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center space-x-2"
+          >
+            <svg className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            <span>{isLoading ? 'Loading...' : 'Refresh Data'}</span>
+          </button>
         </div>
+
+        {/* Agent Info Notice */}
+        <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+          <div className="flex items-center">
+            <svg className="w-5 h-5 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div>
+              <p className="text-green-800 text-sm">
+                <strong>Agent Account:</strong> You are logged in as <strong>{agentInfo?.username}</strong>
+              </p>
+              <p className="text-green-700 text-xs mt-1">
+                You can only view installments that have been assigned to you by your admin.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Installments Table */}
+        {isLoading ? (
+          <div className="flex justify-center items-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+          </div>
+        ) : (
+          <AgentInstallmentTable installments={myInstallments} />
+        )}
       </div>
     </div>
   )

@@ -99,19 +99,7 @@ export default function Signup(){
               />
             </div>
 
-            {/* Confirm Password */}
-            <div>
-              <label className="block text-gray-300 text-sm font-medium mb-2 uppercase tracking-wide">
-                REPEAT PASSWORD
-              </label>
-              <input 
-                value={confirmPassword} 
-                onChange={e=>setConfirmPassword(e.target.value)} 
-                type="password" 
-                placeholder="" 
-                className="w-full p-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300" 
-              />
-            </div>
+           
             
             {/* Email */}
             <div>

@@ -32,12 +32,7 @@ export default function Navbar({ user, onLogout }) {
 
             {/* right side: signup/login on home */}
             <div className="ml-auto flex items-center gap-3">
-              <Link
-                to="/signup"
-                className="px-4 py-2 bg-white border border-gray-200 rounded-md text-sm hover:bg-gray-50"
-              >
-                Sign up
-              </Link>
+           
               <Link
                 to="/login"
                 className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-sm"
@@ -70,12 +65,7 @@ export default function Navbar({ user, onLogout }) {
 
           {/* right side: login/signup */}
           <div className="ml-auto flex items-center gap-3">
-            <Link
-              to="/signup"
-              className="px-4 py-2 bg-white border border-gray-200 rounded-md text-sm hover:bg-gray-50"
-            >
-              Sign up
-            </Link>
+           
             <Link
               to="/login"
               className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-sm"

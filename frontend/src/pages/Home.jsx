@@ -45,19 +45,9 @@ export default function Home() {
                 </p>
 
                 <div className="flex flex-wrap gap-3">
-                  <Link
-                    to="/signup"
-                    className="inline-flex items-center gap-2 px-5 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-md transition"
-                  >
-                    Get started (Sign up)
-                  </Link>
+                
 
-                  <Link
-                    to="/login"
-                    className="inline-flex items-center gap-2 px-5 py-3 border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-lg transition bg-white/80"
-                  >
-                    Log in
-                  </Link>
+                
                 </div>
 
                

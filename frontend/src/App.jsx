@@ -3,7 +3,6 @@ import React, { useEffect, useState, useCallback } from 'react'
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import Home from './pages/Home'
 import Login from './pages/Login'
-import Signup from './pages/Signup'
 import UserDashboard from './pages/UserDashboard'
 import AdminDashboard from './pages/AdminDashboard'
 import Navbar from './components/Navbar'
@@ -14,8 +13,8 @@ function readStoredUser() {
     const raw = localStorage.getItem('user')
     if (!token || !raw) return null
     const parsed = JSON.parse(raw)
-    // basic sanity check: must have id and email
-    if (!parsed?.id || !parsed?.email) return null
+    // basic sanity check: must have id and email/username
+    if (!parsed?.id || (!parsed?.email && !parsed?.username)) return null
     return parsed
   } catch {
     return null
@@ -40,22 +39,18 @@ export default function App() {
   useEffect(() => {
     function handleStorage(e) {
       if (e.key === 'user' || e.key === 'token') {
-        setUser(readStoredUser())
+        const newUser = readStoredUser()
+        setUser(newUser)
       }
     }
     window.addEventListener('storage', handleStorage)
     return () => window.removeEventListener('storage', handleStorage)
   }, [])
 
-  // fallback poll for same-tab writes (optional, keeps UI in sync)
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setUser(readStoredUser())
-    }, 1000)
-    return () => clearInterval(interval)
-  }, [])
+  // REMOVED THE POLLING THAT WAS CAUSING AUTO-LOGOUT
+  // The polling was checking localStorage every second and potentially clearing the user
 
-  // called by Login/Signup after successful auth
+  // called by Login after successful auth
   const onAuth = useCallback((userObj, token) => {
     if (!userObj || !token) return
     localStorage.setItem('token', token)
@@ -75,17 +70,15 @@ export default function App() {
             user ? <Navigate to={user.role === 'admin' ? '/admin' : '/dashboard'} /> : <Login onAuth={onAuth} />
           }
         />
-        <Route
-          path="/signup"
-          element={
-            user ? <Navigate to={user.role === 'admin' ? '/admin' : '/dashboard'} /> : <Signup onAuth={onAuth} />
-          }
-        />
         <Route path="/dashboard" element={user ? <UserDashboard user={user} /> : <Navigate to="/login" />} />
-        <Route
-          path="/admin"
-          element={user?.role === 'admin' ? <AdminDashboard user={user} /> : <Navigate to="/login" />}
-        />
+      <Route
+  path="/admin"
+  element={
+    user?.role === 'admin'
+      ? <AdminDashboard user={user} onLogout={onLogout} />
+      : <Navigate to="/login" />
+  }
+/>
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </div>
