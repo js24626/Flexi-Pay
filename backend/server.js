@@ -15,7 +15,7 @@ app.use(express.json())
 
 // lowdb setup (file: db.json) — provide default data to avoid missing default data error
 const adapter = new JSONFile('./db.json')
-const defaultData = { users: [], agents: [], agentAmounts: [] }
+const defaultData = { users: [], agentAmounts: [] }
 
 // pass defaultData as second arg so lowdb won't throw on newer versions
 const db = new Low(adapter, defaultData)
@@ -28,10 +28,10 @@ if (!db.data) {
 }
 
 // Ensure all arrays exist
-if (!db.data.agents) {
-  db.data.agents = []
-  await db.write()
-}
+// if (!db.data.agents) {
+//   db.data.agents = []
+//   await db.write()
+// }
 
 if (!db.data.agentAmounts) {
   db.data.agentAmounts = []
@@ -46,6 +46,7 @@ if (process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD) {
     const admin = {
       id: nanoid(),
       email: process.env.ADMIN_EMAIL,
+      username: 'admin',
       password: hashed,
       role: 'admin',
       full_name: 'Admin',
@@ -65,6 +66,7 @@ function createToken(user) {
 }
 
 function authMiddleware(req, res, next) {
+  debugger;
   const auth = req.headers.authorization
   if (!auth?.startsWith('Bearer ')) return res.status(401).json({ error: 'Unauthorized' })
   const token = auth.split(' ')[1]
@@ -78,60 +80,71 @@ function authMiddleware(req, res, next) {
 }
 
 function adminMiddleware(req, res, next) {
+  debugger;
   if (req.user?.role !== 'admin') return res.status(403).json({ error: 'Forbidden' })
   next()
 }
 
-app.get("/",(req,res)=>{
+app.get("/", (req, res) => {
   res.send("Server is working ");
 })
 
 // ADMIN LOGIN
 app.post('/auth/login', async (req, res) => {
-  const { email, password } = req.body
-  if (!email || !password) return res.status(400).json({ error: 'Email and password required' })
+
+  const { username, password } = req.body
+  if (!username || !password) return res.status(400).json({ error: 'Username and password required' })
   await db.read()
-  const user = db.data.users.find(u => u.email === email)
+  const user = db.data.users.find(u => u.username === username)
   if (!user) return res.status(400).json({ error: 'Invalid credentials' })
   const ok = await bcrypt.compare(password, user.password)
   if (!ok) return res.status(400).json({ error: 'Invalid credentials' })
   const token = createToken(user)
-  res.json({ token, user: { id: user.id, email: user.email, role: user.role, full_name: user.full_name } })
+  res.json({
+    token,
+    user: {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      full_name: user.full_name
+    }
+  })
 })
 
 // AGENT LOGIN
-app.post('/auth/agent-login', async (req, res) => {
-  const { username, password } = req.body
-  if (!username || !password) return res.status(400).json({ error: 'Username and password required' })
-  
-  await db.read()
-  const agent = db.data.agents.find(a => a.username.toLowerCase() === username.toLowerCase())
-  if (!agent) return res.status(400).json({ error: 'Invalid credentials' })
-  
-  const ok = await bcrypt.compare(password, agent.password)
-  if (!ok) return res.status(400).json({ error: 'Invalid credentials' })
-  
-  const token = createToken({ id: agent.id, role: 'agent', email: agent.email })
-  res.json({ 
-    token, 
-    user: { 
-      id: agent.id, 
-      username: agent.username,
-      email: agent.email, 
-      role: 'agent' 
-    } 
-  })
-})
+// app.post('/auth/agent-login', async (req, res) => {
+//   const { username, password } = req.body
+//   if (!username || !password) return res.status(400).json({ error: 'Username and password required' })
+
+//   await db.read()
+//   const agent = db.data.users.find(a => a.username.toLowerCase() === username.toLowerCase())
+//   if (!agent) return res.status(400).json({ error: 'Invalid credentials' })
+
+//   const ok = await bcrypt.compare(password, agent.password)
+//   if (!ok) return res.status(400).json({ error: 'Invalid credentials' })
+
+//   const token = createToken({ id: agent.id, role: 'agent', email: agent.email })
+//   res.json({ 
+//     token, 
+//     user: { 
+//       id: agent.id, 
+//       username: agent.username,
+//       email: agent.email, 
+//       role: 'agent' 
+//     } 
+//   })
+// })
 
 // AGENTS CRUD - Admin only
 // GET all agents
 app.get('/agents', authMiddleware, adminMiddleware, async (req, res) => {
   await db.read()
-  const agents = db.data.agents.map(a => ({ 
-    id: a.id, 
-    username: a.username, 
-    email: a.email, 
-    created_at: a.created_at 
+  debugger;
+  const agents = db.data.user.map(a => ({
+    id: a.id,
+    username: a.username,
+    email: a.email,
+    created_at: a.created_at
   }))
   res.json(agents)
 })
@@ -142,49 +155,50 @@ app.post('/agents', authMiddleware, adminMiddleware, async (req, res) => {
   if (!username || !email || !password) {
     return res.status(400).json({ error: 'Username, email and password required' })
   }
-  
+
   await db.read()
-  
+
   // Check if username already exists
-  const existingAgent = db.data.agents.find(a => a.username.toLowerCase() === username.toLowerCase())
+  const existingAgent = db.data.users.find(a => a.username.toLowerCase() === username.toLowerCase())
   if (existingAgent) {
     return res.status(400).json({ error: 'Username already exists' })
   }
-  
+
   // Check if email already exists
-  const existingEmail = db.data.agents.find(a => a.email.toLowerCase() === email.toLowerCase())
+  const existingEmail = db.data.users.find(a => a.email.toLowerCase() === email.toLowerCase())
   if (existingEmail) {
     return res.status(400).json({ error: 'Email already exists' })
   }
-  
+
   const hashedPassword = await bcrypt.hash(password, 10)
   const agent = {
     id: nanoid(),
     username,
     email,
     password: hashedPassword,
+    role: 'agent',
     created_at: new Date().toISOString()
   }
-  
-  db.data.agents.push(agent)
+
+  db.data.users.push(agent)
   await db.write()
-  
+
   // Return agent without password
-  res.json({ 
-    id: agent.id, 
-    username: agent.username, 
-    email: agent.email, 
-    created_at: agent.created_at 
+  res.json({
+    id: agent.id,
+    username: agent.username,
+    email: agent.email,
+    created_at: agent.created_at
   })
 })
 
 // DELETE agent
 app.delete('/agents/:id', authMiddleware, adminMiddleware, async (req, res) => {
   await db.read()
-  const idx = db.data.agents.findIndex(a => a.id === req.params.id)
+  const idx = db.data.users.findIndex(a => a.id === req.params.id)
   if (idx === -1) return res.status(404).json({ error: 'Agent not found' })
-  
-  db.data.agents.splice(idx, 1)
+
+  db.data.users.splice(idx, 1)
   await db.write()
   res.json({ success: true })
 })
@@ -209,9 +223,9 @@ app.get('/agent-amounts/my-amounts', authMiddleware, async (req, res) => {
     }
 
     await db.read()
-    
+
     // Find agent by ID
-    const agent = db.data.agents.find(a => a.id === req.user.id)
+    const agent = db.data.users.find(a => a.id === req.user.id)
     if (!agent) {
       return res.status(404).json({ error: 'Agent not found' })
     }
@@ -220,7 +234,7 @@ app.get('/agent-amounts/my-amounts', authMiddleware, async (req, res) => {
     const myAmounts = (db.data.agentAmounts || []).filter(
       amount => amount.createdBy === agent.username
     )
-    
+
     res.json(myAmounts)
   } catch (error) {
     console.error('Error loading agent amounts:', error)
@@ -232,24 +246,24 @@ app.get('/agent-amounts/my-amounts', authMiddleware, async (req, res) => {
 app.post('/agent-amounts', authMiddleware, async (req, res) => {
   try {
     const { amount, date, username } = req.body
-    
+
     if (!amount || !date) {
       return res.status(400).json({ error: 'Amount and date are required' })
     }
-    
+
     await db.read()
-    
+
     let createdByUsername = username
-    
+
     // For agents, verify they can only create amounts for themselves
     if (req.user.role === 'agent') {
-      const agent = db.data.agents.find(a => a.id === req.user.id)
+      const agent = db.data.users.find(a => a.id === req.user.id)
       if (!agent) {
         return res.status(403).json({ error: 'Agent not found' })
       }
       createdByUsername = agent.username
     }
-    
+
     const agentAmount = {
       id: nanoid(),
       amount: parseFloat(amount),
@@ -257,16 +271,16 @@ app.post('/agent-amounts', authMiddleware, async (req, res) => {
       username: createdByUsername,
       createdBy: createdByUsername,
       createdAt: new Date().toISOString(),
-      
+
     }
-    
+
     if (!db.data.agentAmounts) {
       db.data.agentAmounts = []
     }
-    
+
     db.data.agentAmounts.push(agentAmount)
     await db.write()
-    
+
     res.json(agentAmount)
   } catch (error) {
     console.error('Error creating agent amount:', error)
@@ -282,7 +296,7 @@ app.delete('/agent-amounts/:id', authMiddleware, adminMiddleware, async (req, re
     if (idx === -1) {
       return res.status(404).json({ error: 'Agent amount not found' })
     }
-    
+
     db.data.agentAmounts.splice(idx, 1)
     await db.write()
     res.json({ success: true })

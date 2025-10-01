@@ -6,6 +6,8 @@ export function getToken() {
 }
 
 export async function api(path, { method = 'GET', body, headers = {} } = {}) {
+  
+
   const token = getToken()
   const h = { 'Content-Type': 'application/json', ...headers }
   if (token) h['Authorization'] = `Bearer ${token}`
