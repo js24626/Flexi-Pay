@@ -201,7 +201,7 @@ app.get('/agent-amounts', authMiddleware, adminMiddleware, async (req, res) => {
   }
 })
 
-// GET agent's own amounts (agent only)
+// GET agent's own amounts (agent only) - includes amounts created by admin for this agent
 app.get('/agent-amounts/my-amounts', authMiddleware, async (req, res) => {
   try {
     if (req.user.role !== 'agent') {
@@ -216,9 +216,9 @@ app.get('/agent-amounts/my-amounts', authMiddleware, async (req, res) => {
       return res.status(404).json({ error: 'Agent not found' })
     }
 
-    // Filter amounts by agent username
+    // Filter amounts by agent username - includes amounts created by admin for this agent
     const myAmounts = (db.data.agentAmounts || []).filter(
-      amount => amount.createdBy === agent.username
+      amount => amount.createdBy === agent.username || amount.username === agent.username
     )
     
     res.json(myAmounts)
@@ -228,49 +228,101 @@ app.get('/agent-amounts/my-amounts', authMiddleware, async (req, res) => {
   }
 })
 
-// CREATE agent amount (agents can create their own)
+// CREATE agent amount (agents can create their own, admin can create for any agent)
 app.post('/agent-amounts', authMiddleware, async (req, res) => {
   try {
-    const { amount, date, username } = req.body
+    const { amount, date, wasoolAmount, bakayaAmount, username } = req.body
     
-    if (!amount || !date) {
-      return res.status(400).json({ error: 'Amount and date are required' })
+    if (!amount || !date || !wasoolAmount || !bakayaAmount) {
+      return res.status(400).json({ error: 'Amount, date, wasool amount, and bakaya amount are required' })
     }
-    
+
     await db.read()
-    
+
     let createdByUsername = username
-    
-    // For agents, verify they can only create amounts for themselves
+    let targetUsername = username
+
+    // Handle different user roles
     if (req.user.role === 'agent') {
+      // Agents can only create their own entries
       const agent = db.data.agents.find(a => a.id === req.user.id)
       if (!agent) {
         return res.status(403).json({ error: 'Agent not found' })
       }
       createdByUsername = agent.username
+      targetUsername = agent.username
+    } else if (req.user.role === 'admin') {
+      // Admin can create for any agent, but needs username
+      if (!username) {
+        return res.status(400).json({ error: 'Username is required when admin creates amount for agent' })
+      }
+      
+      // Verify the target agent exists
+      const targetAgent = db.data.agents.find(a => a.username.toLowerCase() === username.toLowerCase())
+      if (!targetAgent) {
+        return res.status(400).json({ error: 'Target agent not found' })
+      }
+      
+      createdByUsername = 'Admin'  // Mark as created by admin
+      targetUsername = username
     }
-    
+
     const agentAmount = {
       id: nanoid(),
       amount: parseFloat(amount),
+      wasoolAmount: parseFloat(wasoolAmount),
+      bakayaAmount: parseFloat(bakayaAmount),
       date,
-      username: createdByUsername,
-      createdBy: createdByUsername,
+      username: targetUsername,      // Agent this amount belongs to
+      createdBy: createdByUsername,  // Who created it (agent username or 'Admin')
       createdAt: new Date().toISOString(),
-      
     }
-    
+
     if (!db.data.agentAmounts) {
       db.data.agentAmounts = []
     }
-    
+
     db.data.agentAmounts.push(agentAmount)
     await db.write()
-    
+
     res.json(agentAmount)
   } catch (error) {
     console.error('Error creating agent amount:', error)
     res.status(500).json({ error: 'Failed to create agent amount' })
+  }
+})
+
+// UPDATE agent amount (admin only)
+app.put('/agent-amounts/:id', authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const { amount, wasoolAmount, bakayaAmount, date } = req.body
+    
+    if (!amount || !date || !wasoolAmount || !bakayaAmount) {
+      return res.status(400).json({ error: 'Amount, date, wasool amount, and bakaya amount are required' })
+    }
+
+    await db.read()
+    
+    const idx = db.data.agentAmounts.findIndex(a => a.id === req.params.id)
+    if (idx === -1) {
+      return res.status(404).json({ error: 'Agent amount not found' })
+    }
+    
+    // Update the amount
+    db.data.agentAmounts[idx] = {
+      ...db.data.agentAmounts[idx],
+      amount: parseFloat(amount),
+      wasoolAmount: parseFloat(wasoolAmount),
+      bakayaAmount: parseFloat(bakayaAmount),
+      date,
+      updatedAt: new Date().toISOString()
+    }
+    
+    await db.write()
+    res.json(db.data.agentAmounts[idx])
+  } catch (error) {
+    console.error('Error updating agent amount:', error)
+    res.status(500).json({ error: 'Failed to update agent amount' })
   }
 })
 

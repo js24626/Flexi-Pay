@@ -6,13 +6,15 @@ import { api } from '../lib/api'
 const AmountCreationForm = ({ onSubmit, agentInfo }) => {
   const [formData, setFormData] = useState({
     amount: '',
-    date: ''
+    date: '',
+    wasoolAmount: '',
+    bakayaAmount: ''
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!formData.amount || !formData.date) {
+    if (!formData.amount || !formData.date || !formData.wasoolAmount || !formData.bakayaAmount) {
       alert('Please fill in all fields')
       return
     }
@@ -23,7 +25,7 @@ const AmountCreationForm = ({ onSubmit, agentInfo }) => {
         ...formData,
         username: agentInfo?.username
       })
-      setFormData({ amount: '', date: '' })
+      setFormData({ amount: '', date: '', wasoolAmount: '', bakayaAmount: '' })
     } catch (error) {
       console.error('Error creating amount:', error)
     } finally {
@@ -61,6 +63,38 @@ const AmountCreationForm = ({ onSubmit, agentInfo }) => {
               disabled={isSubmitting}
             />
           </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Wasool Amount *
+            </label>
+            <input
+              type="number"
+              name="wasoolAmount"
+              value={formData.wasoolAmount}
+              onChange={handleChange}
+              className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+              placeholder="Enter wasool amount"
+              required
+              disabled={isSubmitting}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Bakaya Amount *
+            </label>
+            <input
+              type="number"
+              name="bakayaAmount"
+              value={formData.bakayaAmount}
+              onChange={handleChange}
+              className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+              placeholder="Enter bakaya amount"
+              required
+              disabled={isSubmitting}
+            />
+          </div>
           
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -87,7 +121,7 @@ const AmountCreationForm = ({ onSubmit, agentInfo }) => {
             {isSubmitting && (
               <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 714 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
             )}
             <span>{isSubmitting ? 'Creating...' : 'Create Amount'}</span>
@@ -98,8 +132,19 @@ const AmountCreationForm = ({ onSubmit, agentInfo }) => {
   )
 }
 
-// Agent Created Amounts Table Component
+// Agent Created Amounts Table Component with Date Filter
 const AgentAmountsTable = ({ amounts }) => {
+  const [dateFilter, setDateFilter] = useState('')
+
+  // Filter amounts based on date
+  const filteredAmounts = amounts.filter(amount => {
+    return !dateFilter || amount.date === dateFilter
+  })
+
+  const clearDateFilter = () => {
+    setDateFilter('')
+  }
+
   if (amounts.length === 0) {
     return (
       <div className="bg-white rounded-lg shadow-sm border p-8 text-center">
@@ -117,8 +162,46 @@ const AgentAmountsTable = ({ amounts }) => {
   return (
     <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
       <div className="px-6 py-4 border-b border-gray-200">
-        <h3 className="text-lg font-semibold text-gray-900">My Created Amounts</h3>
-        <p className="text-sm text-gray-500 mt-1">Amounts you have created</p>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center space-x-4">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">My Created Amounts</h3>
+              <p className="text-sm text-gray-500 mt-1">Amounts you have created</p>
+            </div>
+            {/* Small Stats Box */}
+            <div className="bg-green-50 border border-green-200 rounded-lg px-4 py-2">
+              <div className="text-sm text-green-600 font-medium">Total Amounts</div>
+              <div className="text-xl font-bold text-green-700">{amounts.length}</div>
+            </div>
+          </div>
+          
+          {/* Date Filter */}
+          <div className="relative">
+            <input
+              type="date"
+              value={dateFilter}
+              onChange={(e) => setDateFilter(e.target.value)}
+              className="pl-3 pr-10 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 w-40"
+            />
+            {dateFilter && (
+              <button
+                onClick={clearDateFilter}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+              >
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+          </div>
+        </div>
+        
+        {dateFilter && (
+          <p className="text-sm text-gray-600">
+            Showing {filteredAmounts.length} of {amounts.length} amounts
+            <span className="ml-1 text-green-600">for date: {dateFilter}</span>
+          </p>
+        )}
       </div>
       
       <div className="overflow-x-auto">
@@ -129,31 +212,53 @@ const AgentAmountsTable = ({ amounts }) => {
                 Amount
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Wasool Amount
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Bakaya Amount
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Date
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Created At
               </th>
-            
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {amounts.map((amount, index) => (
-              <tr key={amount.id || index} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">Rs {parseFloat(amount.amount || 0).toLocaleString()}</div>
+            {filteredAmounts.length === 0 ? (
+              <tr>
+                <td colSpan="5" className="px-6 py-8 text-center text-gray-500">
+                  {dateFilter ? 'No amounts found for this date' : 'No amounts to display'}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">{amount.date}</div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-500">
-                    {amount.createdAt ? new Date(amount.createdAt).toLocaleDateString() : '-'}
-                  </div>
-                </td>
-              
               </tr>
-            ))}
+            ) : (
+              filteredAmounts.map((amount, index) => (
+                <tr key={amount.id || index} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900">Rs {parseFloat(amount.amount || 0).toLocaleString()}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900">
+                      Rs {parseFloat(amount.wasoolAmount || 0).toLocaleString()}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900">
+                      Rs {parseFloat(amount.bakayaAmount || 0).toLocaleString()}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900">{amount.date}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-500">
+                      {amount.createdAt ? new Date(amount.createdAt).toLocaleDateString() : '-'}
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
@@ -244,7 +349,7 @@ export default function AgentDashboard() {
                 localStorage.removeItem('token')
                 localStorage.removeItem('user')
                 sessionStorage.clear()
-                window.location.replace('/login')
+                window.location.replace('/')
               }}
               className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
               title="Logout"
