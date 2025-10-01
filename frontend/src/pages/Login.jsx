@@ -1,21 +1,21 @@
-// frontend/src/pages/Login.jsx
+
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../lib/api'
 
 export default function Login({ onAuth }) {
-  const [loginType, setLoginType] = useState('admin') // 'admin' or 'agent'
-  const [email, setEmail] = useState('')
+  const [loginType] = useState('admin') // 'admin' or 'agent'
+  
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
 
-  async function handleAdminLogin(e) {
+  async function handleLogin(e) {
     e?.preventDefault()
     try {
       setLoading(true)
-      const data = await api('/auth/login', { method: 'POST', body: { email, password } })
+      const data = await api('/auth/login', { method: 'POST', body: { username, password } })
       if (!data?.token || !data?.user) throw new Error('Invalid login response')
       
       // Store token + user
@@ -35,38 +35,38 @@ export default function Login({ onAuth }) {
     }
   }
 
-  async function handleAgentLogin(e) {
-    e?.preventDefault()
-    try {
-      setLoading(true)
+  // async function handleAgentLogin(e) {
+  //   e?.preventDefault()
+  //   try {
+  //     setLoading(true)
       
-      // Use server API for agent login
-      const data = await api('/auth/agent-login', { 
-        method: 'POST', 
-        body: { username, password } 
-      })
+  //     // Use server API for agent login
+  //     const data = await api('/auth/agent-login', { 
+  //       method: 'POST', 
+  //       body: { username, password } 
+  //     })
       
-      if (!data?.token || !data?.user) throw new Error('Invalid login response')
+  //     if (!data?.token || !data?.user) throw new Error('Invalid login response')
       
-      // Store token + user
-      localStorage.setItem('token', data.token)
-      localStorage.setItem('user', JSON.stringify(data.user))
+  //     // Store token + user
+  //     localStorage.setItem('token', data.token)
+  //     localStorage.setItem('user', JSON.stringify(data.user))
       
-      // Notify App immediately
-      if (onAuth) onAuth(data.user, data.token)
-      setLoading(false)
+  //     // Notify App immediately
+  //     if (onAuth) onAuth(data.user, data.token)
+  //     setLoading(false)
       
-      // Redirect to agent dashboard
-      navigate('/dashboard')
+  //     // Redirect to agent dashboard
+  //     navigate('/dashboard')
       
-    } catch (err) {
-      setLoading(false)
-      alert(err.message || 'Agent login failed')
-      console.error('agent login error', err)
-    }
-  }
+  //   } catch (err) {
+  //     setLoading(false)
+  //     alert(err.message || 'Agent login failed')
+  //     console.error('agent login error', err)
+  //   }
+  // }
 
-  const handleLogin = loginType === 'admin' ? handleAdminLogin : handleAgentLogin
+ // const handleLogin = loginType === 'admin' ? handleAdminLogin : handleAgentLogin
 
   return (
     <div className="min-h-screen relative flex items-center justify-center overflow-hidden">
@@ -88,12 +88,12 @@ export default function Login({ onAuth }) {
           {/* Tab Headers */}
           <div className="flex mb-8">
             <div className="flex-1 text-center py-3 text-white text-lg font-medium bg-blue-600/50 rounded-lg border-b-2 border-blue-400">
-              SIGN IN
+              Prompt
             </div>
           </div>
 
           {/* Login Type Selector */}
-          <div className="mb-6">
+          {/* <div className="mb-6">
             <div className="flex bg-white/5 rounded-lg p-1 border border-white/10">
               <button
                 type="button"
@@ -128,26 +128,9 @@ export default function Login({ onAuth }) {
                 Agent Login
               </button>
             </div>
-          </div>
+          </div> */}
 
           <form onSubmit={handleLogin} className="space-y-6">
-            {loginType === 'admin' ? (
-              // Admin Login Fields
-              <div>
-                <label className="block text-gray-300 text-sm font-medium mb-2 uppercase tracking-wide">
-                  EMAIL
-                </label>
-                <input 
-                  value={email} 
-                  onChange={e => setEmail(e.target.value)} 
-                  placeholder="Enter admin email" 
-                  type="email"
-                  required
-                  className="w-full p-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300" 
-                />
-              </div>
-            ) : (
-              // Agent Login Fields
               <div>
                 <label className="block text-gray-300 text-sm font-medium mb-2 uppercase tracking-wide">
                   USERNAME
@@ -155,15 +138,15 @@ export default function Login({ onAuth }) {
                 <input 
                   value={username} 
                   onChange={e => setUsername(e.target.value)} 
-                  placeholder="Enter agent username" 
+                  placeholder="Enter username" 
                   type="text"
                   required
                   className="w-full p-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent transition-all duration-300" 
                 />
               </div>
-            )}
             
-            {/* Password Field */}
+            
+           
             <div>
               <label className="block text-gray-300 text-sm font-medium mb-2 uppercase tracking-wide">
                 PASSWORD
@@ -172,7 +155,7 @@ export default function Login({ onAuth }) {
                 value={password} 
                 onChange={e => setPassword(e.target.value)} 
                 type="password" 
-                placeholder={`Enter ${loginType} password`} 
+                placeholder={`Enter password`} 
                 required
                 className={`w-full p-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-white placeholder-gray-400 focus:outline-none focus:ring-2 ${
                   loginType === 'admin' ? 'focus:ring-blue-400' : 'focus:ring-green-400'
@@ -181,21 +164,19 @@ export default function Login({ onAuth }) {
             </div>
 
             {/* Agent Credentials Info */}
-            {loginType === 'agent' && (
+            {/* {loginType === 'agent' && (
               <div className="bg-green-600/20 border border-green-400/30 rounded-lg p-3">
                 <div className="flex items-start">
                   <svg className="w-5 h-5 text-green-400 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   <div>
-                    <p className="text-green-300 text-sm font-medium">Agent Login</p>
-                    <p className="text-green-200 text-xs mt-1">
-                      Use the username and password provided by your admin to access your dashboard.
-                    </p>
+                    <p className="text-green-300 text-sm font-medium">Login</p>
+                   
                   </div>
                 </div>
               </div>
-            )}
+            )} */}
             
             {/* Sign In Button */}
             <div className="pt-4">
@@ -214,7 +195,7 @@ export default function Login({ onAuth }) {
                     Signing in…
                   </div>
                 ) : (
-                  `SIGN IN AS ${loginType.toUpperCase()}`
+                  `LOGIN`
                 )}
               </button>
             </div>
@@ -227,7 +208,7 @@ export default function Login({ onAuth }) {
             </div>
 
             {/* Login Type Info */}
-            <div className="text-center">
+            {/* <div className="text-center">
               <p className="text-gray-400 text-sm">
                 {loginType === 'admin' ? (
                   <>
@@ -243,7 +224,7 @@ export default function Login({ onAuth }) {
                   </>
                 )}
               </p>
-            </div>
+            </div> */}
           </form>
         </div>
       </div>
