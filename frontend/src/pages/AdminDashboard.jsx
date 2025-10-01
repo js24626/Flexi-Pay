@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { api } from '../lib/api'
 
 // Agent Signup Form Component
-const AgentSignupForm = ({ onSubmit, onCancel }) => {
+const AgentSignupForm = ({ onSubmit }) => {
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -42,16 +42,8 @@ const AgentSignupForm = ({ onSubmit, onCancel }) => {
 
   return (
     <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
-      <div className="flex items-center justify-between mb-4">
+      <div className="mb-4">
         <h3 className="text-lg font-semibold text-gray-900">Create New Agent Account</h3>
-        <button
-          onClick={onCancel}
-          className="text-gray-500 hover:text-gray-700"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
       </div>
       
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -106,15 +98,7 @@ const AgentSignupForm = ({ onSubmit, onCancel }) => {
           </div>
         </div>
         
-        <div className="flex justify-end space-x-3 pt-4">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
-            disabled={isSubmitting}
-          >
-            Cancel
-          </button>
+        <div className="flex justify-end pt-4">
           <button
             type="submit"
             className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium flex items-center space-x-2"
@@ -130,6 +114,310 @@ const AgentSignupForm = ({ onSubmit, onCancel }) => {
           </button>
         </div>
       </form>
+    </div>
+  )
+}
+
+// Amount Creation Form Component for Admin to create amounts for agents
+const AdminAmountCreationForm = ({ onSubmit, agents }) => {
+  const [formData, setFormData] = useState({
+    username: '',
+    amount: '',
+    date: '',
+    wasoolAmount: '',
+    bakayaAmount: ''
+  })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    if (!formData.username || !formData.amount || !formData.date || !formData.wasoolAmount || !formData.bakayaAmount) {
+      alert('Please fill in all fields')
+      return
+    }
+    
+    setIsSubmitting(true)
+    try {
+      await onSubmit(formData)
+      setFormData({ username: '', amount: '', date: '', wasoolAmount: '', bakayaAmount: '' })
+    } catch (error) {
+      console.error('Error creating amount:', error)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    })
+  }
+
+  return (
+    <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
+      <div className="mb-4">
+        <h3 className="text-lg font-semibold text-gray-900">Create Amount for Agent</h3>
+      </div>
+      
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Agent Username *
+            </label>
+            <select
+              name="username"
+              value={formData.username}
+              onChange={handleChange}
+              className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+              required
+              disabled={isSubmitting}
+            >
+              <option value="">Select Agent</option>
+              {agents.map(agent => (
+                <option key={agent.id} value={agent.username}>
+                  {agent.username}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Amount *
+            </label>
+            <input
+              type="number"
+              name="amount"
+              value={formData.amount}
+              onChange={handleChange}
+              className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+              placeholder="Enter amount"
+              required
+              disabled={isSubmitting}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Wasool Amount *
+            </label>
+            <input
+              type="number"
+              name="wasoolAmount"
+              value={formData.wasoolAmount}
+              onChange={handleChange}
+              className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+              placeholder="Enter wasool amount"
+              required
+              disabled={isSubmitting}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Bakaya Amount *
+            </label>
+            <input
+              type="number"
+              name="bakayaAmount"
+              value={formData.bakayaAmount}
+              onChange={handleChange}
+              className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+              placeholder="Enter bakaya amount"
+              required
+              disabled={isSubmitting}
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Date *
+            </label>
+            <input
+              type="date"
+              name="date"
+              value={formData.date}
+              onChange={handleChange}
+              className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+              required
+              disabled={isSubmitting}
+            />
+          </div>
+        </div>
+        
+        <div className="flex justify-end pt-4">
+          <button
+            type="submit"
+            className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors font-medium flex items-center space-x-2"
+            disabled={isSubmitting}
+          >
+            {isSubmitting && (
+              <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            )}
+            <span>{isSubmitting ? 'Creating...' : 'Create Amount'}</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  )
+}
+
+// Edit Amount Modal Component
+const EditAmountModal = ({ amount, onSave, onCancel, isOpen }) => {
+  const [formData, setFormData] = useState({
+    amount: amount?.amount || '',
+    wasoolAmount: amount?.wasoolAmount || '',
+    bakayaAmount: amount?.bakayaAmount || '',
+    date: amount?.date || ''
+  })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  useEffect(() => {
+    if (amount) {
+      setFormData({
+        amount: amount.amount || '',
+        wasoolAmount: amount.wasoolAmount || '',
+        bakayaAmount: amount.bakayaAmount || '',
+        date: amount.date || ''
+      })
+    }
+  }, [amount])
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    if (!formData.amount || !formData.date || !formData.wasoolAmount || !formData.bakayaAmount) {
+      alert('Please fill in all fields')
+      return
+    }
+    
+    setIsSubmitting(true)
+    try {
+      await onSave(formData)
+    } catch (error) {
+      console.error('Error updating amount:', error)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    })
+  }
+
+  if (!isOpen) return null
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-gray-900">Edit Amount</h3>
+          <button
+            onClick={onCancel}
+            className="text-gray-500 hover:text-gray-700"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Amount *
+            </label>
+            <input
+              type="number"
+              name="amount"
+              value={formData.amount}
+              onChange={handleChange}
+              className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Enter amount"
+              required
+              disabled={isSubmitting}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Wasool Amount *
+            </label>
+            <input
+              type="number"
+              name="wasoolAmount"
+              value={formData.wasoolAmount}
+              onChange={handleChange}
+              className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Enter wasool amount"
+              required
+              disabled={isSubmitting}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Bakaya Amount *
+            </label>
+            <input
+              type="number"
+              name="bakayaAmount"
+              value={formData.bakayaAmount}
+              onChange={handleChange}
+              className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Enter bakaya amount"
+              required
+              disabled={isSubmitting}
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Date *
+            </label>
+            <input
+              type="date"
+              name="date"
+              value={formData.date}
+              onChange={handleChange}
+              className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              required
+              disabled={isSubmitting}
+            />
+          </div>
+          
+          <div className="flex justify-end space-x-3 pt-4">
+            <button
+              type="button"
+              onClick={onCancel}
+              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
+              disabled={isSubmitting}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium flex items-center space-x-2"
+              disabled={isSubmitting}
+            >
+              {isSubmitting && (
+                <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              )}
+              <span>{isSubmitting ? 'Updating...' : 'Update Amount'}</span>
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   )
 }
@@ -153,8 +441,17 @@ const AgentsTable = ({ agents, onDelete }) => {
   return (
     <div className="bg-white rounded-lg shadow-sm border overflow-hidden mb-6">
       <div className="px-6 py-4 border-b border-gray-200">
-        <h3 className="text-lg font-semibold text-gray-900">Agent Accounts</h3>
-        <p className="text-sm text-gray-500 mt-1">Agents can use these credentials to login</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900">Agent Accounts</h3>
+            <p className="text-sm text-gray-500 mt-1">Agents can use these credentials to login</p>
+          </div>
+          {/* Small Stats Box */}
+          <div className="bg-green-50 border border-green-200 rounded-lg px-4 py-2">
+            <div className="text-sm text-green-600 font-medium">Total Agents</div>
+            <div className="text-xl font-bold text-green-700">{agents.length}</div>
+          </div>
+        </div>
       </div>
       
       <div className="overflow-x-auto">
@@ -216,14 +513,104 @@ const AgentsTable = ({ agents, onDelete }) => {
   )
 }
 
-// Agent Created Amounts Table Component with Search Filter
-const AgentAmountsTable = ({ agentAmounts, onDelete }) => {
+// Agent Created Amounts Table Component with Search Filter, Date Filter and Pagination
+const AgentAmountsTable = ({ agentAmounts, onDelete, onEdit }) => {
   const [searchTerm, setSearchTerm] = useState('')
+  const [dateFilter, setDateFilter] = useState('')
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 10
 
-  // Filter amounts based on search term (by agent name)
-  const filteredAmounts = agentAmounts.filter(amount =>
-    amount.createdBy?.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  // Filter amounts based on search term and date
+  const filteredAmounts = agentAmounts.filter(amount => {
+    const matchesSearch = amount.createdBy?.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesDate = !dateFilter || amount.date === dateFilter
+    return matchesSearch && matchesDate
+  })
+
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredAmounts.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const currentAmounts = filteredAmounts.slice(startIndex, endIndex)
+
+  // Reset to first page when search or date filter changes
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchTerm, dateFilter])
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page)
+  }
+
+  const clearDateFilter = () => {
+    setDateFilter('')
+  }
+
+  const renderPagination = () => {
+    if (totalPages <= 1) return null
+
+    const pages = []
+    const maxVisiblePages = 5
+    
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2))
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1)
+    
+    if (endPage - startPage < maxVisiblePages - 1) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1)
+    }
+
+    // Previous button
+    pages.push(
+      <button
+        key="prev"
+        onClick={() => handlePageChange(currentPage - 1)}
+        disabled={currentPage === 1}
+        className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-l-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        Previous
+      </button>
+    )
+
+    // Page numbers
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(
+        <button
+          key={i}
+          onClick={() => handlePageChange(i)}
+          className={`px-3 py-2 text-sm font-medium border-t border-b border-r border-gray-300 ${
+            currentPage === i
+              ? 'bg-blue-50 text-blue-600 border-blue-300'
+              : 'bg-white text-gray-700 hover:bg-gray-50'
+          }`}
+        >
+          {i}
+        </button>
+      )
+    }
+
+    // Next button
+    pages.push(
+      <button
+        key="next"
+        onClick={() => handlePageChange(currentPage + 1)}
+        disabled={currentPage === totalPages}
+        className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-r-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        Next
+      </button>
+    )
+
+    return (
+      <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
+        <div className="flex items-center justify-between">
+          <div className="text-sm text-gray-500">
+            Showing {startIndex + 1} to {Math.min(endIndex, filteredAmounts.length)} of {filteredAmounts.length} results
+          </div>
+          <div className="flex">{pages}</div>
+        </div>
+      </div>
+    )
+  }
 
   if (agentAmounts.length === 0) {
     return (
@@ -243,30 +630,62 @@ const AgentAmountsTable = ({ agentAmounts, onDelete }) => {
     <div className="bg-white rounded-lg shadow-sm border overflow-hidden mb-6">
       <div className="px-6 py-4 border-b border-gray-200">
         <div className="flex items-center justify-between mb-4">
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900">Agent Created Amounts</h3>
-            <p className="text-sm text-gray-500 mt-1">Amounts created by agents</p>
+          <div className="flex items-center space-x-4">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Agent Created Amounts</h3>
+              <p className="text-sm text-gray-500 mt-1">Amounts created by agents</p>
+            </div>
+            {/* Small Stats Box */}
+            <div className="bg-purple-50 border border-purple-200 rounded-lg px-4 py-2">
+              <div className="text-sm text-purple-600 font-medium">Total Amounts</div>
+              <div className="text-xl font-bold text-purple-700">{agentAmounts.length}</div>
+            </div>
           </div>
-          {/* Search Filter */}
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search by agent name..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 pr-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-64"
-            />
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
+          
+          {/* Filters */}
+          <div className="flex space-x-4">
+            {/* Date Filter */}
+            <div className="relative">
+              <input
+                type="date"
+                value={dateFilter}
+                onChange={(e) => setDateFilter(e.target.value)}
+                className="pl-3 pr-10 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-40"
+              />
+              {dateFilter && (
+                <button
+                  onClick={clearDateFilter}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                >
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
+            </div>
+            
+            {/* Search Filter */}
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search by agent name..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 pr-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-64"
+              />
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
             </div>
           </div>
         </div>
         
-        {searchTerm && (
+        {(searchTerm || dateFilter) && (
           <p className="text-sm text-gray-600">
             Showing {filteredAmounts.length} of {agentAmounts.length} amounts
+            {dateFilter && <span className="ml-1 text-blue-600">for date: {dateFilter}</span>}
           </p>
         )}
       </div>
@@ -279,7 +698,13 @@ const AgentAmountsTable = ({ agentAmounts, onDelete }) => {
                 Agent Name
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Amount
+                Total Amount
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Wasool Amount
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Bakaya Amount
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Date
@@ -293,14 +718,14 @@ const AgentAmountsTable = ({ agentAmounts, onDelete }) => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {filteredAmounts.length === 0 ? (
+            {currentAmounts.length === 0 ? (
               <tr>
-                <td colSpan="5" className="px-6 py-8 text-center text-gray-500">
-                  {searchTerm ? 'No amounts found for this agent name' : 'No amounts to display'}
+                <td colSpan="7" className="px-6 py-8 text-center text-gray-500">
+                  {searchTerm || dateFilter ? 'No amounts found matching your filters' : 'No amounts to display'}
                 </td>
               </tr>
             ) : (
-              filteredAmounts.map((amount, index) => (
+              currentAmounts.map((amount, index) => (
                 <tr key={amount.id || index} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
@@ -312,27 +737,42 @@ const AgentAmountsTable = ({ agentAmounts, onDelete }) => {
                       <div className="text-sm text-gray-900">{amount.createdBy}</div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">Rs {parseFloat(amount.amount || 0).toLocaleString()}</div>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    Rs {parseFloat(amount.amount || 0).toLocaleString()}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{amount.date}</div>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-green-600 font-medium">
+                    Rs {parseFloat(amount.wasoolAmount || 0).toLocaleString()}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-500">
-                      {amount.createdAt ? new Date(amount.createdAt).toLocaleDateString() : '-'}
-                    </div>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-red-600 font-medium">
+                    Rs {parseFloat(amount.bakayaAmount || 0).toLocaleString()}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {amount.date}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {amount.createdAt ? new Date(amount.createdAt).toLocaleDateString() : '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button
-                      onClick={() => onDelete(amount.id || index)}
-                      className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50"
-                      title="Delete Amount"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                    </button>
+                    <div className="flex items-center justify-end space-x-2">
+                      <button
+                        onClick={() => onEdit(amount)}
+                        className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50"
+                        title="Edit Amount"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                      </button>
+                      <button
+                        onClick={() => onDelete(amount.id || index)}
+                        className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50"
+                        title="Delete Amount"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))
@@ -340,6 +780,9 @@ const AgentAmountsTable = ({ agentAmounts, onDelete }) => {
           </tbody>
         </table>
       </div>
+      
+      {/* Pagination */}
+      {renderPagination()}
     </div>
   )
 }
@@ -349,6 +792,8 @@ export default function AdminDashboard() {
   const [agents, setAgents] = useState([])
   const [agentAmounts, setAgentAmounts] = useState([])
   const [isLoading, setIsLoading] = useState(false)
+  const [editingAmount, setEditingAmount] = useState(null)
+  const [showEditModal, setShowEditModal] = useState(false)
   const [showAgentForm, setShowAgentForm] = useState(false)
   const navigate = useNavigate()
 
@@ -390,13 +835,34 @@ export default function AdminDashboard() {
       
       // Add to agents list
       setAgents(prev => [created, ...prev])
-      setShowAgentForm(false)
       
       alert(`Agent account created successfully!\n\nLogin Credentials:\nUsername: ${formData.username}\nPassword: ${formData.password}\n\nThe agent can now use these credentials to login.`)
       
     } catch (error) {
       console.error('Failed to create agent:', error)
       alert(error.message || 'Failed to create agent account. Please try again.')
+    }
+  }
+
+  const handleCreateAmount = async (formData) => {
+    try {
+      const created = await api('/agent-amounts', { 
+        method: 'POST', 
+        body: {
+          ...formData,
+          createdBy: formData.username,
+          createdAt: new Date().toISOString()
+        }
+      })
+      
+      // Add to agent amounts list
+      setAgentAmounts(prev => [created, ...prev])
+      
+      alert('Amount created successfully for agent!')
+      
+    } catch (error) {
+      console.error('Failed to create amount:', error)
+      alert(error.message || 'Failed to create amount. Please try again.')
     }
   }
 
@@ -430,7 +896,31 @@ export default function AdminDashboard() {
     }
   }
 
-  const totalAgentAmounts = agentAmounts.length
+  const handleEditAmount = (amount) => {
+    setEditingAmount(amount)
+    setShowEditModal(true)
+  }
+
+  const handleUpdateAmount = async (formData) => {
+    try {
+      const updated = await api(`/agent-amounts/${editingAmount.id}`, {
+        method: 'PUT',
+        body: formData
+      })
+
+      // Update the local state
+      setAgentAmounts(prev => prev.map(amount => 
+        amount.id === editingAmount.id ? { ...amount, ...updated } : amount
+      ))
+      
+      setShowEditModal(false)
+      setEditingAmount(null)
+      alert('Amount updated successfully!')
+    } catch (error) {
+      console.error('Failed to update amount:', error)
+      alert('Failed to update amount. Please try again.')
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -462,7 +952,7 @@ export default function AdminDashboard() {
 
                 localStorage.removeItem('token')
                 localStorage.removeItem('user')
-                window.location.replace('/login')
+                window.location.replace('/')
               }}
               className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
               title="Logout"
@@ -484,43 +974,8 @@ export default function AdminDashboard() {
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">Overview</h2>
           
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            {/* Total Agents Card */}
-            <div className="bg-white rounded-lg shadow-sm border p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">Total Agents</h3>
-                  <p className="text-3xl font-bold text-green-600">{agents.length}</p>
-                  <p className="text-sm text-gray-500 mt-1">Active agent accounts</p>
-                </div>
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
-                  <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                  </svg>
-                </div>
-              </div>
-            </div>
-
-            {/* Agent Amounts Card */}
-            <div className="bg-white rounded-lg shadow-sm border p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">Agent Amounts</h3>
-                  <p className="text-3xl font-bold text-purple-600">{totalAgentAmounts}</p>
-                  <p className="text-sm text-gray-500 mt-1">Created by agents</p>
-                </div>
-                <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center">
-                  <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                  </svg>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Action Button */}
-          <div className="mb-8">
+          {/* Create Agent Button */}
+          <div className="mb-6">
             <button
               onClick={() => setShowAgentForm(!showAgentForm)}
               className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center space-x-2"
@@ -528,18 +983,27 @@ export default function AdminDashboard() {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
               </svg>
-              <span>{showAgentForm ? 'Hide Agent Form' : 'Create Agent'}</span>
+              <span>{showAgentForm ? 'Hide Agent Form' : 'Create Agent Account'}</span>
             </button>
           </div>
         </div>
 
-        {/* Agent Signup Form */}
-        {showAgentForm && (
-          <AgentSignupForm
-            onSubmit={handleCreateAgent}
-            onCancel={() => setShowAgentForm(false)}
-          />
-        )}
+        {/* Agent Signup Form - Show/Hide based on state */}
+        {showAgentForm && <AgentSignupForm onSubmit={handleCreateAgent} />}
+
+        {/* Admin Amount Creation Form - Always Visible */}
+        <AdminAmountCreationForm onSubmit={handleCreateAmount} agents={agents} />
+
+        {/* Edit Amount Modal */}
+        <EditAmountModal
+          amount={editingAmount}
+          onSave={handleUpdateAmount}
+          onCancel={() => {
+            setShowEditModal(false)
+            setEditingAmount(null)
+          }}
+          isOpen={showEditModal}
+        />
 
         {/* Loading State */}
         {isLoading ? (
@@ -554,10 +1018,11 @@ export default function AdminDashboard() {
               onDelete={handleDeleteAgent}
             />
 
-            {/* Agent Created Amounts Table */}
+            {/* Agent Created Amounts Table with Pagination and Date Filter */}
             <AgentAmountsTable
               agentAmounts={agentAmounts}
               onDelete={handleDeleteAgentAmount}
+              onEdit={handleEditAmount}
             />
           </>
         )}

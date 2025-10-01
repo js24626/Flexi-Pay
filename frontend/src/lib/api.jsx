@@ -1,5 +1,6 @@
 // frontend/src/lib/api.js
 const API_BASE = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'
+// const API_BASE = "https://flexipay-backendrender.onrender.com"
 
 export function getToken() {
   return localStorage.getItem('token')
