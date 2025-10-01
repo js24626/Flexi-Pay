@@ -31,7 +31,7 @@ export default function Home() {
                     className="w-16 h-16 object-contain"
                   />
                   <span className="text-md font-medium text-gray-200 uppercase tracking-wide">
-                    FlexyPay
+                    Prompt
                   </span>
                 </div>
 
@@ -40,7 +40,7 @@ export default function Home() {
                 </h1>
 
                 <p className="text-xl text-gray-200 mb-8 max-w-xl">
-                  FlexyPay helps groups and committees collect, track and approve installment payments.
+                  Prompt helps groups and committees collect, track and approve installment payments.
                   Users submit instalments easily — admins review and approve. Secure auth, clear records, and a clean workflow.
                 </p>
 
@@ -69,7 +69,7 @@ export default function Home() {
         {/* Simple Footer */}
         <footer className="border-t border-black/20 mt-12 relative z-10">
           <div className="max-w-7xl mx-auto px-6 py-6 flex flex-col md:flex-row items-center justify-between text-gray-800">
-            <div className="text-sm">© {new Date().getFullYear()} FlexyPay — Built for fair communities.</div>
+            <div className="text-sm">© {new Date().getFullYear()} Prompt — Built for fair communities.</div>
             <div className="mt-3 md:mt-0 text-sm">Made with ❤️ — Simple, secure, transparent</div>
           </div>
         </footer>

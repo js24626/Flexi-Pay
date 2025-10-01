@@ -2,7 +2,7 @@
 import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
 
-export default function Navbar({ user, onLogout }) {
+export default function Navbar({ user }) {
   const location = useLocation()
   const { pathname } = location
 
@@ -26,7 +26,7 @@ export default function Navbar({ user, onLogout }) {
                   alt="App Logo"
                   className="w-12 h-12 object-contain"
                 />
-                <span className="font-bold text-lg text-gray-100">FLEXYPAY</span>
+                <span className="font-bold text-lg text-gray-100">Prompt</span>
               </Link>
             </div>
 
@@ -59,7 +59,7 @@ export default function Navbar({ user, onLogout }) {
                 alt="App Logo"
                 className="w-12 h-12 object-contain"
               />
-              <span className="font-bold text-lg text-white">FLEXYPAY</span>
+              <span className="font-bold text-lg text-white">Prompt</span>
             </Link>
           </div>
 
