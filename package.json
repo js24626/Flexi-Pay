@@ -13,5 +13,9 @@
   },
   "devDependencies": {
     "concurrently": "^9.2.1"
+  },
+  "dependencies": {
+    "lowdb": "^7.0.1",
+    "nanoid": "^5.1.6"
   }
 }
