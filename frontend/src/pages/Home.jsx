@@ -4,76 +4,60 @@ import { Link } from 'react-router-dom'
 
 export default function Home() {
   return (
-    <div className="min-h-screen relative">
-      {/* Background Image */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{
-          backgroundImage: `url(/images/bg.jpg)`
-        }}
-      ></div>
+    <div className="h-screen grid grid-cols-1 md:grid-cols-[7fr_3fr] relative overflow-hidden">
+      {/* Left Side (Text content with dark blue background) */}
+      <div className="bg-[#0d2953] flex flex-col justify-center px-8">
+        <div className="max-w-xl">
+          {/* Logo + FlexiPay text */}
+          <div className="flex items-center mb-6">
+            <img 
+              src="/images/flexi.png"  // your logo file in public/images/
+              alt="FlexiPay Logo"
+              className="w-12 h-12 object-contain"
+            />
+            <span className="text-xl font-semibold text-white tracking-wide">
+              FlexiPay
+            </span>
+          </div>
 
-      {/* Dark overlay (optional for readability) */}
-      <div className="absolute inset-0 bg-gradient-to-b from-gray-900/70 via-gray-900/50 to-white"></div>
+          {/* Heading */}
+          <h1 className="text-4xl sm:text-5xl font-extrabold text-white leading-tight mb-6">
+           Flexible installments, simplified for communities
+          </h1>
 
-      {/* Page Content */}
-      <div className="relative z-10">
-        {/* Hero */}
-        <section className="relative overflow-hidden">
-          <div className="max-w-7xl mx-auto px-6 lg:px-8 py-10">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
-              {/* Left: Text */}
-              <div>
-                <div className="inline-flex items-center mb-6">
-                  <img 
-                    src="/images/flexi.png"   // put your logo file inside public/images/
-                    alt="App Logo"
-                    className="w-16 h-16 object-contain"
-                  />
-                  <span className="text-md font-medium text-gray-200 uppercase tracking-wide">
-                    FlexyPay
-                  </span>
-                </div>
+          {/* Subtext */}
+          <p className="text-lg text-gray-200 mb-8">
+           FlexyPay helps groups and committees collect, track and approve installment payments. Users submit instalments easily — admins review and approve. Secure auth, clear records, and a clean workflow.
+          </p>
 
-                <h1 className="text-4xl sm:text-5xl font-extrabold text-white leading-tight mb-6">
-                  Flexible installments, simplified for communities
-                </h1>
+          {/* Buttons */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+            <Link
+              to="/login"
+              className="bg-green-600 text-white font-semibold px-6 py-3 rounded-md shadow-md hover:bg-green-700 transition"
+            >
+              Login
+            </Link>
 
-                <p className="text-xl text-gray-200 mb-8 max-w-xl">
-                  FlexyPay helps groups and committees collect, track and approve installment payments.
-                  Users submit instalments easily — admins review and approve. Secure auth, clear records, and a clean workflow.
-                </p>
-
-                <div className="flex flex-wrap gap-3">
-                
-
-                
-                </div>
-
-               
-              </div>
-
-              <div className="relative flex justify-center md:justify-end">
-        <img 
-          src="/images/pro.png" 
-          alt="Community illustration"
-          className="w-full max-w-md rounded-2xl  object-cover"
-        />
+           
+          </div>
+        </div>
       </div>
 
+     <div className="bg-gray-200 flex items-center justify-center p-6">
+  <img 
+    src="/images/sideimg.png"   // replace with your illustration
+    alt="Community illustration"
+    className="w-full max-w-sm h-auto object-contain"  // increased from xs → sm
+  />
+</div>
 
-            </div>
-          </div>
-        </section>
 
-        {/* Simple Footer */}
-        <footer className="border-t border-black/20 mt-12 relative z-10">
-          <div className="max-w-7xl mx-auto px-6 py-6 flex flex-col md:flex-row items-center justify-between text-gray-800">
-            <div className="text-sm">© {new Date().getFullYear()} FlexyPay — Built for fair communities.</div>
-            <div className="mt-3 md:mt-0 text-sm">Made with ❤️ — Simple, secure, transparent</div>
-          </div>
-        </footer>
-      </div>
+
+      {/* Footer (bottom center, no scroll) */}
+      <footer className="absolute bottom-3 left-1/2 transform -translate-x-1/2 text-center text-sm text-gray-400">
+        © {new Date().getFullYear()} FlexyPay — All rights reserved.
+      </footer>
     </div>
   )
 }

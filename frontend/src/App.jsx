@@ -6,7 +6,7 @@ import Login from './pages/Login'
 
 import UserDashboard from './pages/UserDashboard'
 import AdminDashboard from './pages/AdminDashboard'
-import Navbar from './components/Navbar'
+
 
 function readStoredUser() {
   try {
@@ -61,7 +61,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar user={user} onLogout={onLogout} />
+    
 
       <Routes>
         <Route path="/" element={<Home />} />
